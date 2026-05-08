@@ -113,6 +113,21 @@
                 <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
                     <label style="font-size: 0.85em; color: #7f8c8d; font-weight: bold; display: block; margin-bottom: 5px;">Profil Fotoğrafı Değiştir</label>
                     {{ ph_form.image }}
+
+    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+    <label style="font-size: 0.85em; color: #7f8c8d; font-weight: bold; display: block; margin-bottom: 5px;">Profil Fotoğrafı Seç</label>
+    
+    <!-- 1. Dosya Seçme Girişi -->
+    <input type="file" id="image-input" accept="image/*" style="margin-bottom: 10px;">
+
+    <!-- 2. Kırpma Alanı (Başlangıçta gizli tutuyoruz) -->
+    <div id="cropper-wrapper" style="display:none; max-width: 100%; margin-top: 10px;">
+        <img id="image-preview" style="max-width: 100%;">
+        <button type="button" id="crop-button" style="margin-top:10px; background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">
+            ✅ Alanı Onayla
+        </button>
+    </div>
+</div>
                     {% if ph_form.image.errors %}
                         <p style="color: #e74c3c; font-size: 0.8em; margin-top: 5px;">{{ ph_form.image.errors.0 }}</p>
                     {% endif %}
