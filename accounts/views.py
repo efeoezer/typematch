@@ -121,8 +121,10 @@ def profile_view(request):
                 if current_photo:
                     current_photo.delete()
                     
-                new_photo = ph_form.save(commit=False)
-                new_photo.profile = profile
+                new_photo = UserPhoto(
+                    profile=profile,
+                    image=request.FILES['image']
+                )
                 new_photo.save()
                 
             messages.success(request, "Bilgilerin güncellendi!")
