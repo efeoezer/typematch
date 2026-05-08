@@ -314,6 +314,7 @@ countrySelect.addEventListener('change', function() {
         });
     });
 });
+    
 </script>
 {% endblock %}
 
@@ -346,3 +347,58 @@ countrySelect.addEventListener('change', function() {
 </div>
 
 <button type="button" id="crop-save-button">Kırp ve Kaydet</button>
+
+<script>
+    // Mevcut script kodlarının bittiği yere ekleyebilirsin
+let cropper;
+const imageInput = document.getElementById('image-input');
+const imagePreview = document.getElementById('image-preview');
+const cropperWrapper = document.getElementById('cropper-wrapper');
+const cropButton = document.getElementById('crop-button');
+
+// Resim seçildiğinde çalışan fonksiyon
+imageInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            imagePreview.src = event.target.result;
+            cropperWrapper.style.display = 'block'; // Alanı göster
+            
+            if (cropper) cropper.destroy(); // Eski cropper varsa temizle
+            
+            cropper = new Cropper(imagePreview, {
+                aspectRatio: 1, // Kare kırpma
+                viewMode: 1,
+                background: false
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form gönderilirken kırpılmış veriyi ekle
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (cropper) {
+        e.preventDefault(); // Formu durdur, önce resmi işleyelim
+        const form = this;
+        
+        cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob((blob) => {
+            const formData = new FormData(form);
+            // Django'daki formun beklediği dosya ismiyle (muhtemelen 'image') ekliyoruz
+            formData.set('image', blob, 'profile.jpg'); 
+
+            // Veriyi sunucuya gönder (Fetch API ile)
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            }).then(response => {
+                if (response.ok) window.location.reload(); // Başarılıysa sayfayı yenile
+            });
+        });
+    }
+});
+</script>
