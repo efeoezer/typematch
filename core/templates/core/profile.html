@@ -1,62 +1,26 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}TypeMatch | Profil Analizi{% endblock %}
 
 {% block content %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<!-- Dış Kütüphaneler (Grafik ve Fotoğraf Kırpma) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-
+<link rel="stylesheet" href="{% static 'accounts/css/badges.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-</script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Mevcut grafik kodların burada kalmaya devam edecek...
-
 <style>
-    .profile-container {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 30px;
-        max-width: 1000px;
-        margin: 40px auto;
-        padding: 20px;
-    }
-    .profile-card {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        text-align: center;
-    }
-    .chart-container {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .mbti-badge {
-        display: inline-block;
-        background: #2c3e50;
-        color: white;
-        padding: 10px 25px;
-        border-radius: 8px;
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-top: 15px;
-    }
+    .profile-container { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; max-width: 1000px; margin: 40px auto; padding: 20px; }
+    .profile-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+    .chart-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center; }
+    .mbti-badge { display: inline-block; background: #2c3e50; color: white; padding: 10px 25px; border-radius: 8px; font-size: 1.5em; font-weight: bold; margin-top: 15px; }
 </style>
 
 <div class="profile-container">
     <div class="profile-card">
         
+        <!-- Profil Fotoğrafı Alanı -->
         <div style="width: 150px; height: 150px; border-radius: 50%; background: #bdc3c7; margin: 0 auto 20px auto; overflow: hidden; border: 3px solid #eee;">
             {% if profile.userphoto_set.first %}
                 <img src="{{ profile.userphoto_set.first.image.url }}" alt="Profil Fotoğrafı" style="width: 100%; height: 100%; object-fit: cover;">
@@ -73,7 +37,15 @@
             </div>
         {% endif %}
         
-        <h2 style="color: #2c3e50; margin-bottom: 5px;">{{ profile.user.username }}</h2>
+        <!-- Kullanıcı Bilgileri ve Rozetler -->
+        <h2 style="color: #2c3e50; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            {{ profile.user.username }}
+            {% if profile.is_verified %}
+                <span class="verification-badge" title="Güvenilir Profil" style="font-size: 0.5em; display: inline-flex; align-items: center; gap: 4px; background: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold;">
+                    <i class="fas fa-check-circle"></i> Doğrulanmış
+                </span>
+            {% endif %}
+        </h2>
         <p style="color: #7f8c8d;">Sistem Kayıtlı Profil</p>
         
         <div class="mbti-badge">
@@ -104,40 +76,26 @@
         </div>
         {% endif %}
         
+        <!-- Güncelleme Formu -->
         <div style="margin-top: 30px; text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #eee;">
             <h3 style="color: #2c3e50; font-size: 1.1em; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;">Bilgileri Güncelle</h3>
             
-            <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+            <form method="POST" enctype="multipart/form-data" id="profile-update-form" style="display: flex; flex-direction: column; gap: 15px;">
                 {% csrf_token %}
 
+                <!-- YENİ: Kırpılabilir Fotoğraf Yükleme Alanı -->
                 <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                    <label style="font-size: 0.85em; color: #7f8c8d; font-weight: bold; display: block; margin-bottom: 5px;">Profil Fotoğrafı Değiştir</label>
-                    {{ ph_form.image }}
-
-    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-    <label style="font-size: 0.85em; color: #7f8c8d; font-weight: bold; display: block; margin-bottom: 5px;">Profil Fotoğrafı Seç</label>
-    
-    <!-- 1. Dosya Seçme Girişi -->
-    <input type="file" id="image-input" accept="image/*" style="margin-bottom: 10px;">
-
-    <!-- 2. Kırpma Alanı (Başlangıçta gizli tutuyoruz) -->
-    <div id="cropper-wrapper" style="display:none; max-width: 100%; margin-top: 10px;">
-        <img id="image-preview" style="max-width: 100%;">
-        <button type="button" id="crop-button" style="margin-top:10px; background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">
-            ✅ Alanı Onayla
-        </button>
-    </div>
-</div>
+                    <label style="font-size: 0.85em; color: #7f8c8d; font-weight: bold; display: block; margin-bottom: 5px;">Profil Fotoğrafı Seç</label>
+                    <input type="file" id="image-input" accept="image/*" style="margin-bottom: 10px; width: 100%;">
+                    
+                    <div id="cropper-wrapper" style="display:none; max-width: 100%; margin-top: 10px;">
+                        <img id="image-preview" style="max-width: 100%; display: block;">
+                    </div>
+                    
+                    <div style="display:none;">{{ ph_form.image }}</div> <!-- Asıl Django Inputu Gizlendi -->
+                    
                     {% if ph_form.image.errors %}
                         <p style="color: #e74c3c; font-size: 0.8em; margin-top: 5px;">{{ ph_form.image.errors.0 }}</p>
-                    {% endif %}
-
-                    {% if current_photo %}
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee;">
-                        <a href="{% url 'delete_photo' %}" style="color: #e74c3c; font-size: 0.85em; text-decoration: none; font-weight: bold; display: inline-block;">
-                            🗑️ Mevcut Fotoğrafı Kaldır
-                        </a>
-                    </div>
                     {% endif %}
                 </div>
                 
@@ -163,10 +121,10 @@
                 </div>
                 
                 <div class="location-picker" style="display: flex; gap: 15px; width: 100%;">
-                    <select id="country-select" name="country" class="custom-select" style="flex: 1;">
+                    <select id="country-select" name="country" class="custom-select" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #bdc3c7;">
                         <option value="">Ülke Seçin</option>
                     </select>
-                    <select id="city-select" name="city" class="custom-select" style="flex: 1;">
+                    <select id="city-select" name="city" class="custom-select" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #bdc3c7;">
                         <option value="">Önce Ülke Seçin</option>
                     </select>
                 </div>
@@ -176,25 +134,29 @@
                     <textarea name="bio" rows="3" placeholder="Kendinden biraz bahset..." style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.9em; resize: none;">{{ p_form.bio.value|default:'' }}</textarea>
                 </div>
 
-                <button type="submit" style="background: #3498db; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;">Kaydet ve Güncelle</button>
+                <button type="submit" id="main-submit-btn" style="background: #3498db; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;">Kaydet ve Güncelle</button>
             </form>
+
             <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #fee2e2;">
-                <a href="{% url 'edit_lifestyle' %}" class="dropdown-item">
-    ⚙️ Yaşam Standartlarımı Güncelle
-</a>
-    <h4 style="color: #991b1b; font-size: 0.9em;">Tehlikeli Alan</h4>
-    <a href="{% url 'delete_account' %}" style="color: #ef4444; font-size: 0.85em; text-decoration: underline;">
-        Hesabımı tamamen silmek istiyorum
-    </a>
-</div>
+                <a href="{% url 'edit_lifestyle' %}" class="dropdown-item" style="display: block; margin-bottom: 15px; text-decoration: none; color: #2c3e50; font-weight: bold;">
+                    ⚙️ Yaşam Standartlarımı Güncelle
+                </a>
+                <h4 style="color: #991b1b; font-size: 0.9em;">Tehlikeli Alan</h4>
+                <a href="{% url 'delete_account' %}" style="color: #ef4444; font-size: 0.85em; text-decoration: underline;">
+                    Hesabımı tamamen silmek istiyorum
+                </a>
+            </div>
         </div>
     </div>
+    
+    <!-- Grafik Alanı -->
     <div class="chart-container">
         <div style="position: relative; height: 100%; width: 100%; max-height: 500px; max-width: 500px;">
             <canvas id="mbtiRadarChart"></canvas>
         </div>
     </div>
-    </div>
+</div>
+
 <div style="max-width: 1000px; margin: 0 auto 40px auto; background: #ffffff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
     <h3 style="color: #2d3748; font-size: 1.2em; margin-bottom: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">🧠 MBTI Harfleri Ne Anlama Geliyor?</h3>
     <p style="font-size: 0.9em; color: #718096; margin-bottom: 20px; line-height: 1.6;">
@@ -202,208 +164,153 @@
     </p>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        
         <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #f6e05e;">
             <h4 style="font-size: 0.95em; color: #4a5568; margin-bottom: 10px;">⚡ 1. Enerji Yönü (Dünya ile Etkileşim)</h4>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(E) Dışadönük (Extravert):</strong> Enerjisini dış dünyadan, insanlarla vakit geçirmekten ve aksiyondan alır.</p>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(I) İçe Dönük (Introvert):</strong> Enerjisini iç dünyasından, düşüncelerinden ve yalnız kalmaktan alır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(E) Dışadönük:</strong> Enerjisini dış dünyadan, insanlarla vakit geçirmekten alır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(I) İçe Dönük:</strong> Enerjisini iç dünyasından, düşüncelerinden ve yalnız kalmaktan alır.</p>
         </div>
-
         <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #63b3ed;">
             <h4 style="font-size: 0.95em; color: #4a5568; margin-bottom: 10px;">🔍 2. Bilgi İşleme (Algılama Biçimi)</h4>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(S) Duyusal (Sensing):</strong> Somut gerçeklere, detaylara ve ana odaklanır.</p>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(N) Sezgisel (Intuition):</strong> Soyut kavramlara, büyük resme ve geleceğe odaklanır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(S) Duyusal:</strong> Somut gerçeklere, detaylara ve ana odaklanır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(N) Sezgisel:</strong> Soyut kavramlara, büyük resme ve geleceğe odaklanır.</p>
         </div>
-
         <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #fc8181;">
             <h4 style="font-size: 0.95em; color: #4a5568; margin-bottom: 10px;">⚖️ 3. Karar Verme (Kriterler)</h4>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(T) Mantıksal (Thinking):</strong> Kararlarını objektif mantık, analiz ve neden-sonuç ilişkisine göre alır.</p>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(F) Duygusal (Feeling):</strong> Kararlarını kişisel değerler, empati ve diğer insanlara olan etkisine göre alır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(T) Mantıksal:</strong> Kararlarını objektif mantık, analiz ve neden-sonuç ilişkisine göre alır.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(F) Duygusal:</strong> Kararlarını kişisel değerler, empati ve etkisine göre alır.</p>
         </div>
-
         <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #68d391;">
             <h4 style="font-size: 0.95em; color: #4a5568; margin-bottom: 10px;">📅 4. Yaşam Tarzı (Dış Dünya Düzeni)</h4>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(J) Planlı (Judging):</strong> Düzeni, kuralları ve netliği sever.</p>
-            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(P) Esnek (Perceiving):</strong> Spontanlık ve açık uçluluk sever.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 8px;"><strong>(J) Planlı:</strong> Düzeni, kuralları ve netliği sever.</p>
+            <p style="font-size: 0.85em; color: #4a5568; margin-bottom: 0;"><strong>(P) Esnek:</strong> Spontanlık ve açık uçluluk sever.</p>
         </div>
-
     </div>
 </div>
 
+<!-- TÜM JAVASCRIPT KODLARI BURADA (Tek Bir Yerde ve Hatasız) -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('mbtiRadarChart').getContext('2d');
-        
-        const rawData = {{ chart_data|safe }};
-        
-        const data = {
-            labels: [
-                'Dışadönüklük (E)',
-                'Duyusallık (S)',
-                'Mantıksallık (T)',
-                'Planlılık (J)'
-            ],
-            datasets: [{
-                label: 'Bilişsel Fonksiyon Spektrumu',
-                data: rawData,
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderColor: 'rgba(52, 152, 219, 1)',
-                pointBackgroundColor: 'rgba(52, 152, 219, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(52, 152, 219, 1)'
-            }]
-        };
-
-        const config = {
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ----------------------------------------------------------------
+    // 1. CHART.JS (MBTI RADAR GRAFİĞİ)
+    // ----------------------------------------------------------------
+    const ctx = document.getElementById('mbtiRadarChart');
+    if (ctx) {
+        const rawData = {{ chart_data|safe|default:"[0,0,0,0]" }};
+        new Chart(ctx.getContext('2d'), {
             type: 'radar',
-            data: data,
-            options: {
-                // Grafiğin orantılı büyümesini sağlayan ayar
-                maintainAspectRatio: false,
-                elements: {
-                    line: { borderWidth: 3 }
-                },
-                scales: {
-                    r: {
-                        angleLines: { display: true },
-                        suggestedMin: 0,
-                        suggestedMax: 100,
-                        ticks: {
-                            stepSize: 20
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        };
+            data: {
+                labels: ['Dışadönüklük (E)', 'Duyusallık (S)', 'Mantıksallık (T)', 'Planlılık (J)'],
+                datasets: [{
+                    label: 'Bilişsel Fonksiyon Spektrumu',
+                    data: rawData,
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+                    pointBorderColor: '#fff'
+                }]
+            },
+            options: { maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } } }
+        });
+    }
 
-        new Chart(ctx, config);
-    });
+    // ----------------------------------------------------------------
+    // 2. ÜLKE VE ŞEHİR SEÇİMİ (API)
+    // ----------------------------------------------------------------
     const countrySelect = document.getElementById('country-select');
-const citySelect = document.getElementById('city-select');
+    const citySelect = document.getElementById('city-select');
 
-// 1. Tüm dünyadaki ülkeleri çek ve listeye ekle
-fetch("https://countriesnow.space/api/v0.1/countries/positions")
-    .then(res => res.json())
-    .then(data => {
-        data.data.forEach(c => {
-            let opt = new Option(c.name, c.name);
-            countrySelect.add(opt);
-        });
-    });
+    if (countrySelect && citySelect) {
+        fetch("https://countriesnow.space/api/v0.1/countries/positions")
+            .then(res => res.json())
+            .then(data => {
+                data.data.forEach(c => { countrySelect.add(new Option(c.name, c.name)); });
+            });
 
-// 2. Ülke seçilince şehirleri getir
-countrySelect.addEventListener('change', function() {
-    const countryName = this.value;
-    citySelect.innerHTML = '<option>Yükleniyor...</option>';
-    
-    fetch("https://countriesnow.space/api/v0.1/countries/cities", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ "country": countryName })
-    })
-    .then(res => res.json())
-    .then(data => {
-        citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
-        data.data.forEach(city => {
-            let opt = new Option(city, city);
-            citySelect.add(opt);
+        countrySelect.addEventListener('change', function() {
+            citySelect.innerHTML = '<option>Yükleniyor...</option>';
+            fetch("https://countriesnow.space/api/v0.1/countries/cities", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "country": this.value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+                data.data.forEach(city => { citySelect.add(new Option(city, city)); });
+            });
         });
-    });
+    }
+
+    // ----------------------------------------------------------------
+    // 3. CROPPER.JS (FOTOĞRAF KIRPMA VE YÜKLEME)
+    // ----------------------------------------------------------------
+    let cropper;
+    const imageInput = document.getElementById('image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const cropperWrapper = document.getElementById('cropper-wrapper');
+    const form = document.getElementById('profile-update-form');
+    const submitBtn = document.getElementById('main-submit-btn');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    cropperWrapper.style.display = 'block';
+                    
+                    if (cropper) cropper.destroy();
+                    
+                    cropper = new Cropper(imagePreview, {
+                        aspectRatio: 1, // Kare kırpma kuralı
+                        viewMode: 1,
+                        background: false
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Eğer cropper varsa, normal form gönderimini durdur ve kendi verimizi hazırlayalım
+            if (cropper) {
+                e.preventDefault(); 
+                
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = "Kırpılıyor ve Kaydediliyor...";
+                submitBtn.disabled = true;
+                
+                cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob((blob) => {
+                    const formData = new FormData(form);
+                    formData.set('image', blob, 'profile.jpg'); 
+
+                    fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.reload(); 
+                        } else {
+                            alert("Bir hata oluştu!");
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }).catch(err => {
+                        alert("Bağlantı hatası!");
+                        submitBtn.innerText = originalText;
+                        submitBtn.disabled = false;
+                    });
+                });
+            }
+            // Eğer cropper yoksa (fotoğraf seçilmediyse), form Django'ya normal bir şekilde gider
+        });
+    }
 });
-    
 </script>
 {% endblock %}
-
-<div class="user-info">
-    <h3>
-        {{ profile.user.username }}
-        
-        {% if profile.is_verified %}
-            <span class="verification-badge" title="Güvenilir Profil">
-                <i class="fas fa-check-circle"></i> Doğrulanmış
-            </span>
-        {% endif %}
-    </h3>
-</div>
-
-{% load static %}
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <link rel="stylesheet" href="{% static 'accounts/css/badges.css' %}">
-</head>
-<body>
-    </body>
-</html>
-
-<input type="file" id="image-input" accept="image/*">
-
-<div style="max-width: 500px; max-height: 500px;">
-    <img id="image-preview" style="display: block; max-width: 100%;">
-</div>
-
-<button type="button" id="crop-save-button">Kırp ve Kaydet</button>
-
-<script>
-    // Mevcut script kodlarının bittiği yere ekleyebilirsin
-let cropper;
-const imageInput = document.getElementById('image-input');
-const imagePreview = document.getElementById('image-preview');
-const cropperWrapper = document.getElementById('cropper-wrapper');
-const cropButton = document.getElementById('crop-button');
-
-// Resim seçildiğinde çalışan fonksiyon
-imageInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            imagePreview.src = event.target.result;
-            cropperWrapper.style.display = 'block'; // Alanı göster
-            
-            if (cropper) cropper.destroy(); // Eski cropper varsa temizle
-            
-            cropper = new Cropper(imagePreview, {
-                aspectRatio: 1, // Kare kırpma
-                viewMode: 1,
-                background: false
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// Form gönderilirken kırpılmış veriyi ekle
-document.querySelector('form').addEventListener('submit', function(e) {
-    if (cropper) {
-        e.preventDefault(); // Formu durdur, önce resmi işleyelim
-        const form = this;
-        
-        cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob((blob) => {
-            const formData = new FormData(form);
-            // Django'daki formun beklediği dosya ismiyle (muhtemelen 'image') ekliyoruz
-            formData.set('image', blob, 'profile.jpg'); 
-
-            // Veriyi sunucuya gönder (Fetch API ile)
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            }).then(response => {
-                if (response.ok) window.location.reload(); // Başarılıysa sayfayı yenile
-            } else {
-                   alert("Bir hata oluştu!");
-                   document.querySelector('button[type="submit"]').innerText = originalButtonText;
-                   document.querySelector('button[type="submit"]').disabled = false;
-            }
-    });
-        });
-    }
-});
-</script>
