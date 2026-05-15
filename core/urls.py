@@ -34,4 +34,8 @@ urlpatterns = [
 
     path('api/negotiation-status/<int:match_id>/', views.negotiation_status_api, name='negotiation_status_api')
 
+    path('reset-filters/', views.reset_filters, name='reset_filters'),
+    
+
 ]
+
