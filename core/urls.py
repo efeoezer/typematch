@@ -32,7 +32,7 @@ urlpatterns = [
 
     path('api/active-match-ping/', views.active_match_ping, name='active_match_ping'),
 
-    path('api/negotiation-status/<int:match_id>/', views.negotiation_status_api, name='negotiation_status_api')
+    path('api/negotiation-status/<int:match_id>/', views.negotiation_status_api, name='negotiation_status_api'),
 
     path('reset-filters/', views.reset_filters, name='reset_filters'),
     
