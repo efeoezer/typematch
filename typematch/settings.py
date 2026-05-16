@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'typematch.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'veritabanı_adınız',
+        'USER': 'kullanıcı_adınız',
+        'PASSWORD': 'şifreniz',
+        'HOST': 'localhost',  # Canlıda sunucu adresi
+        'PORT': '5432',       # PostgreSQL standart portu
     }
 }
 
