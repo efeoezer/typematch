@@ -84,6 +84,26 @@ class Profile(models.Model):
     def display_name(self):
         full_name = f"{self.user.first_name} {self.user.last_name}".strip()
         return full_name if full_name else self.user.username
+        
+    @property
+    def guest_level(self):
+        mapping = {'NO_GUESTS': 1, 'WEEKENDS': 3, 'ANYTIME': 5}
+        return mapping.get(self.guest_policy, 1)
+
+    @property
+    def guest_percent(self):
+        mapping = {'NO_GUESTS': 15, 'WEEKENDS': 60, 'ANYTIME': 100}
+        return mapping.get(self.guest_policy, 15)
+
+    @property
+    def cleaning_level(self):
+        mapping = {'RELAXED': 1, 'BIWEEKLY': 2, 'WEEKLY': 4, 'DAILY': 5}
+        return mapping.get(self.cleaning_frequency, 2)
+
+    @property
+    def cleaning_percent(self):
+        mapping = {'RELAXED': 15, 'BIWEEKLY': 40, 'WEEKLY': 80, 'DAILY': 100}
+        return mapping.get(self.cleaning_frequency, 40)
 
 class UserPhoto(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
