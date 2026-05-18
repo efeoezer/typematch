@@ -11,14 +11,16 @@ Sıradan ilan sitelerinin aksine TypeMatch, "Kim nerede yaşıyor?" sorusundan z
 - **Akıllı Eşleşme Algoritması:** Adaylar arası "Kosinüs Benzerliği" ve yüzde tabanlı eşleşme motoru.
 - **Swipe Arayüzü:** Hammer.js ile desteklenen, mobil uyumlu ve sezgisel "Kaydırma" mekanizması.
 - **Otomatik Aday Havuzu:** RandomUser API kullanılarak tek tıkla sisteme gerçekçi bot/aday ekleme sistemi.
+- **Güvenli Veritabanı Mimarisi:** Geliştirme sürecinde SQLite yerine veri bütünlüğü sağlayan PostgreSQL kullanılması ve şifrelerin `.env` ile izole edilmesi.
 - **Güvenli Kimlik Doğrulama:** Django Authentication tabanlı oturum yönetimi ve parçalı veritabanı mimarisi (User & Profile ayrımı).
 
 ## Kullanılan Teknolojiler
 - **Backend:** Python 3.14, Django 6.0.3
 - **Frontend:** HTML5, CSS3 (CSS Grid/Flexbox), JavaScript
 - **Kütüphaneler:** Chart.js (Grafikler), Hammer.js (Swipe efektleri)
-- **Veritabanı:** SQLite (Geliştirme Ortamı)
+- **Veritabanı:** PostgreSQL, `psycopg2`
 - **Dış Servisler:** RandomUser API (Aday Üretimi)
+- **Güvenlik:** `python-dotenv`
 
 ## Kurulum ve Çalıştırma
 
@@ -45,17 +47,29 @@ venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
-**4. Veritabanı Tablolarını İnşa Edin (Migration):**
+**4. Çevre Değişkenlerini (.env) Ayarlayın:**
+
+Projenin ana dizininde (manage.py dosyası ile aynı konumda) .env adında gizli bir dosya oluşturun ve içine kendi yerel PostgreSQL bilgilerinizi yazın:
+```bash
+DB_NAME=typematch_db
+DB_USER=kullanici_adiniz
+DB_PASSWORD=sifreniz
+DB_HOST=localhost
+DB_PORT=5432
+```
+(PostgreSQL üzerinde bu isimle bir veritabanı ve kullanıcı oluşturduğunuzdan emin olun).
+
+**5. Veritabanı Tablolarını İnşa Edin (Migration):**
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
-**5. Yönetici (Superuser) Hesabı Oluşturun:
+**6. Yönetici (Superuser) Hesabı Oluşturun:
 (Bot üretme butonunu görebilmek için gereklidir)**
 ```bash
 python manage.py createsuperuser
 ```
-**5. Yerel Geliştirme Sunucusunu Başlatın:**
+**7. Yerel Geliştirme Sunucusunu Başlatın:**
 ```bash
 python manage.py runserver
 ```
