@@ -20,7 +20,13 @@
         </div>
         <div>
             <h4 style="margin: 0; font-size: 1.1em;">{{ other_user.first_name|default:other_user.username }}</h4>
-            <small id="connection-status" style="color: #bdc3c7;">Bağlanıyor...</small>
+            <small id="user-status" style="display: block; margin-top: 3px;">
+                {% if other_user.profile.is_online %}
+                    <span style="color: #2ecc71; font-weight: 600;">🟢 Çevrimiçi</span>
+                {% else %}
+                    <span style="color: #bdc3c7;">🔴 Son görülme: {{ other_user.profile.last_seen|timesince }} önce</span>
+                {% endif %}
+            </small>
         </div>
     </div>
 
@@ -89,8 +95,7 @@
 
     // Bağlantı başarılı olduğunda (Online durumu)
     chatSocket.onopen = function(e) {
-        document.getElementById('connection-status').innerHTML = "🟢 Çevrimiçi (Canlı)";
-        document.getElementById('connection-status').style.color = "#2ecc71";
+        console.log("Sohbet odasına bağlanıldı.");
     };
 
     // 2. YENİ MESAJ GELDİĞİNDE TETİKLENİR
