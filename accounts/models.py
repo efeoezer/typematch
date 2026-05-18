@@ -68,9 +68,9 @@ class Profile(models.Model):
         return f"{self.user.username} - {self.mbti_type if self.mbti_type else 'Profil'}"
 
     def is_online(self):
-        """Kullanıcının son 5 dakika içinde aktif olup olmadığını döner."""
+        """Kullanıcının son 30 saniye içinde aktif olup olmadığını döner."""
         if self.last_seen:
-            return timezone.now() < self.last_seen + timezone.timedelta(minutes=5)
+            return timezone.now() < self.last_seen + timezone.timedelta(seconds=30)
         return False
 
     @property
